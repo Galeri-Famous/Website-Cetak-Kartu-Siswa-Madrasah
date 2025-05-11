@@ -1,0 +1,84 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cetak Kartu Siswa MI Asy-Syafi'iyyah 02</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #eef4fa; }
+    .card { width: 850px; height: 500px; background-image: url('./kartu-depan.png'); background-size: cover; position: relative; }
+    .field { position: absolute; color: #000; font-size: 14px; }
+    #foto { top: 100px; left: 30px; width: 100px; height: 120px; object-fit: cover; }
+    #nama { top: 100px; left: 150px; }
+    #nisn { top: 130px; left: 150px; }
+    #ttl { top: 160px; left: 150px; }
+    #jk { top: 190px; left: 150px; }
+    #alamat { top: 220px; left: 150px; width: 300px; }
+    #kamad { bottom: 70px; right: 50px; }
+    #ttd { bottom: 60px; right: 50px; width: 80px; height: 40px; }
+    #barcode { bottom: 10px; right: 10px; width: 100px; }
+    #generated-time { bottom: 10px; left: 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h2>Cetak Kartu Siswa MI Asy-Syafi'iyyah 02</h2>
+  <form id="form">
+    <input type="text" placeholder="NISN" id="nisn" required />
+    <input type="file" id="fotoInput" accept="image/*" />
+    <input type="text" placeholder="Nama Kepala Madrasah" id="kamadName" required />
+    <input type="file" id="ttdInput" accept="image/*" />
+    <button type="submit">Generate</button>
+  </form>
+
+  <div class="card" id="card">
+    <img id="foto" class="field" src="" />
+    <div id="nama" class="field"></div>
+    <div id="nisnDisplay" class="field"></div>
+    <div id="ttl" class="field"></div>
+    <div id="jk" class="field"></div>
+    <div id="alamat" class="field"></div>
+    <div id="kamad" class="field"></div>
+    <img id="ttd" class="field" src="" />
+    <img id="barcode" class="field" src="" />
+    <div id="generated-time" class="field"></div>
+  </div>
+
+  <button onclick="window.print()">Cetak</button>
+
+  <script>
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nisn = document.getElementById('nisn').value;
+      const kamad = document.getElementById('kamadName').value;
+      const foto = document.getElementById('fotoInput').files[0];
+      const ttd = document.getElementById('ttdInput').files[0];
+
+      const res = await fetch(`/api/get-siswa.js?nisn=${nisn}`);
+      const data = await res.json();
+
+      document.getElementById('nama').innerText = data.nama || '';
+      document.getElementById('nisnDisplay').innerText = nisn;
+      document.getElementById('ttl').innerText = data.ttl || '';
+      document.getElementById('jk').innerText = data.jk || '';
+      document.getElementById('alamat').innerText = data.alamat || '';
+      document.getElementById('kamad').innerText = kamad;
+      document.getElementById('generated-time').innerText = new Date().toLocaleString();
+
+      if (foto) {
+        const reader = new FileReader();
+        reader.onload = () => document.getElementById('foto').src = reader.result;
+        reader.readAsDataURL(foto);
+      }
+
+      if (ttd) {
+        const reader = new FileReader();
+        reader.onload = () => document.getElementById('ttd').src = reader.result;
+        reader.readAsDataURL(ttd);
+      }
+
+      document.getElementById('barcode').src = `https://barcode.tec-it.com/barcode.ashx?data=https://nisn.data.kemdikbud.go.id/index.php/Cindex/formcaribynisn&code=Code128&text=${nisn}`;
+    });
+  </script>
+</body>
+</html>
